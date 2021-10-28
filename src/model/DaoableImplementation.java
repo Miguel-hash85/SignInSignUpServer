@@ -31,7 +31,7 @@ public class DaoableImplementation implements Signable{
     private final String select=("Select * from user where login=?");
 
     @Override
-    public void signUp(User user) throws Exception, UserAlreadyExistException, ConnectionRefusedException {
+    public void signUp(User user) throws UserAlreadyExistException, ConnectionRefusedException,Exception {
         //con=pool.getConnection();
         
         try{
@@ -59,7 +59,7 @@ public class DaoableImplementation implements Signable{
     }
 
     @Override
-    public User signIn(User user) throws Exception, UserNotFoundException, IncorrectPasswordException, ConnectionRefusedException {
+    public User signIn(User user) throws UserNotFoundException, IncorrectPasswordException, ConnectionRefusedException,Exception {
          //pool.getConnection();
          try{
          stmt = con.prepareStatement(select);
