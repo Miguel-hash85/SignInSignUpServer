@@ -25,37 +25,22 @@ public class BasicConnectionPool{
     private ArrayList<Connection> usedConnections=new ArrayList<>();
     private final short INITIAL_POOL_SIZE=10;
 
-   public BasicConnectionPool create(){
+    // standard constructors  
+    public BasicConnectionPool() {
         user=ResourceBundle.getBundle("config.configuration").getString("USER");
         url=ResourceBundle.getBundle("config.configuration").getString("URL");
         password=ResourceBundle.getBundle("config.configuration").getString("PASSWORD");
-        ArrayList<Connection> pool = new ArrayList<>(INITIAL_POOL_SIZE);
         for (int i = 0; i < INITIAL_POOL_SIZE; i++) {
             try {
-                pool.add(createConnection(url, user, password));
+                connectionPool.add(createConnection(url, user, password));
             } catch (SQLException ex) {
                 Logger.getLogger(BasicConnectionPool.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        return new BasicConnectionPool(url, user, password, pool);
-    }
-    
-    // standard constructors
-
-    public BasicConnectionPool(String url, String user, String password, ArrayList<Connection> connectionPool) {
-        this.url = url;
-        this.user = user;
-        this.password = password;
-        this.connectionPool = connectionPool;
-    }
-    
-   
-    public BasicConnectionPool() {
     }
 
     public Connection getConnection() {
-        Connection connection = connectionPool
-                .remove(connectionPool.size() - 1);
+        Connection connection = connectionPool.remove(connectionPool.size() - 1);
         usedConnections.add(connection);
         return connection;
     }
