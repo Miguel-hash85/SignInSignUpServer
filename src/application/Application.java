@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import logic.PetitionControllerThread;
 
 /**
  *
@@ -24,12 +25,13 @@ public class Application {
     /**
      * @param args the command line arguments
      */
-    private int PORT;
+    private static int PORT = 9000;
 
     public static void main(String[] args) {
         // TODO code application logic here
         ArrayList<PetitionControllerThread> petitionControllerThreads = new ArrayList<>();
         ServerSocket serverSocket = null;
+        PetitionControllerThread petitionControllerThread = null;
         Socket clientSocket = null;
         ObjectOutputStream out;
         DataEncapsulation dataEncapsulaton;
@@ -38,16 +40,18 @@ public class Application {
             while (true) {
                 serverSocket = new ServerSocket(PORT);
                 clientSocket = serverSocket.accept();
-                if (petitionControllerThreads.size() =  > 10) {
-                    out = new ObjectOutputStream(clientSocket.getOutputStream());
-                    dataEncapsulaton= new DataEncapsulation();
-                    dataEncapsulaton.setMessage(Message.CONNECTION_ERROR);
-                    out.writeObject(dataEncapsulaton);
-                    out.close();
-                } else {
+                if (clientSocket != null) {
                     petitionControllerThread = new PetitionControllerThread();
                     petitionControllerThread.setSocket(clientSocket);
                     petitionControllerThreads.add(petitionControllerThread);
+                }       
+                if(petitionControllerThreads.size()>=10) {
+                    out = new ObjectOutputStream(clientSocket.getOutputStream());
+                    dataEncapsulaton = new DataEncapsulation();
+                    dataEncapsulaton.setMessage(Message.CONNECTION_ERROR);
+                    out.writeObject(dataEncapsulaton);
+                    out.close();
+                } else if(petitionControllerThreads.size()>0){
                     petitionControllerThread.start();
                 }
             }
