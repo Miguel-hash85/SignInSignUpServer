@@ -21,9 +21,9 @@ public class BasicConnectionPool{
     private String url;
     private String user;
     private String password;
-    private ArrayList<Connection> connectionPool;
+    private ArrayList<Connection> connectionPool= new ArrayList<>();
     private ArrayList<Connection> usedConnections=new ArrayList<>();
-    private final short INITIAL_POOL_SIZE=10;
+    private final short INITIAL_POOL_SIZE=Short.parseShort(ResourceBundle.getBundle("config.configuration").getString("MAXCONNECTIONS"));
 
     // standard constructors  
     public BasicConnectionPool() {

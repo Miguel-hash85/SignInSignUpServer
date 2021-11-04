@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import logic.PetitionControllerThread;
@@ -25,40 +26,56 @@ public class Application {
     /**
      * @param args the command line arguments
      */
-    private static int PORT = 9000;
+    private final static int PORT = Integer.parseInt(ResourceBundle.getBundle("config.configuration").getString("PORT"));
+    private final static short MAX_CONNECTIONS = Short.parseShort(ResourceBundle.getBundle("config.configuration").getString("MAXCONNECTIONS"));
+    private static ArrayList<PetitionControllerThread> petitionControllerThreads = new ArrayList<>();
 
     public static void main(String[] args) {
         // TODO code application logic here
-        ArrayList<PetitionControllerThread> petitionControllerThreads = new ArrayList<>();
+        //petitionControllerThreads = new ArrayList<>();
         ServerSocket serverSocket = null;
         PetitionControllerThread petitionControllerThread = null;
         Socket clientSocket = null;
-        ObjectOutputStream out;
+        ObjectOutputStream out = null;
         DataEncapsulation dataEncapsulaton;
         try {
-
+            serverSocket = new ServerSocket(PORT);
             while (true) {
-                serverSocket = new ServerSocket(PORT);
                 clientSocket = serverSocket.accept();
                 if (clientSocket != null) {
                     petitionControllerThread = new PetitionControllerThread();
                     petitionControllerThread.setSocket(clientSocket);
-                    petitionControllerThreads.add(petitionControllerThread);
-                }       
-                if(petitionControllerThreads.size()>=10) {
+
+                }
+                if (petitionControllerThreads.size() >= MAX_CONNECTIONS) {
                     out = new ObjectOutputStream(clientSocket.getOutputStream());
                     dataEncapsulaton = new DataEncapsulation();
                     dataEncapsulaton.setMessage(Message.CONNECTION_ERROR);
                     out.writeObject(dataEncapsulaton);
-                    out.close();
-                } else if(petitionControllerThreads.size()>0){
-                    petitionControllerThread.start();
+
+                } else {
+                    synchronized (petitionControllerThreads) {
+                        petitionControllerThreads.add(petitionControllerThread);
+                        petitionControllerThread.start();
+                    }
+
                 }
             }
 
         } catch (IOException ex) {
             Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                out.close();
+
+            } catch (IOException ex) {
+                Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+    }
+
+    public static synchronized void closeThread(PetitionControllerThread thread) {
+        petitionControllerThreads.remove(thread);
     }
 
 }

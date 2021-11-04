@@ -5,6 +5,7 @@
  */
 package logic;
 
+import static application.Application.closeThread;
 import classes.DataEncapsulation;
 import classes.Message;
 import exceptions.ConnectionRefusedException;
@@ -29,6 +30,7 @@ public class PetitionControllerThread extends Thread{
     private DataEncapsulation dataEncapsulation;
     private DaoableFactory daoableFactory;
     private Signable signable;
+    
 
     public Socket getSocket() {
         return socket;
@@ -65,6 +67,7 @@ public class PetitionControllerThread extends Thread{
     
     @Override
     public void run(){
+        daoableFactory=new DaoableFactory();
         signable=daoableFactory.getSignableImplementation();
         ObjectInputStream in = null;
         ObjectOutputStream out = null; 
@@ -73,9 +76,13 @@ public class PetitionControllerThread extends Thread{
              out = new ObjectOutputStream(socket.getOutputStream());
             dataEncapsulation=(DataEncapsulation) in.readObject();
             if(dataEncapsulation.getMessage().equals(Message.SIGNIN)){
-                signable.signIn(dataEncapsulation.getUser());
+                dataEncapsulation.setUser(signable.signIn(dataEncapsulation.getUser()));
+                dataEncapsulation.setMessage(Message.OK);
+                out.writeObject(dataEncapsulation);
             }else if(dataEncapsulation.getMessage().equals(Message.SIGNUP)){
                 signable.signUp(dataEncapsulation.getUser());
+                dataEncapsulation.setMessage(Message.OK);
+                out.writeObject(dataEncapsulation);
             }
         } catch (IOException ex) {
             Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -83,32 +90,16 @@ public class PetitionControllerThread extends Thread{
             Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
         }catch (UserAlreadyExistException aex) {
             dataEncapsulation.setMessage(Message.EXISTING_USERNAME);
-            try {
-                out.writeObject(dataEncapsulation);
-            } catch (IOException ex) {
-                Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            sendMessage(dataEncapsulation, out);
         }catch (ConnectionRefusedException cex) {
             dataEncapsulation.setMessage(Message.CONNECTION_ERROR);
-            try {
-                out.writeObject(dataEncapsulation);
-            } catch (IOException ex) {
-                Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            sendMessage(dataEncapsulation, out);
         }catch (IncorrectPasswordException cex) {
             dataEncapsulation.setMessage(Message.INCORRECT_PASSWORD);
-            try {
-                out.writeObject(dataEncapsulation);
-            } catch (IOException ex) {
-                Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            sendMessage(dataEncapsulation, out);
         }catch (UserNotFoundException cex) {
-            dataEncapsulation.setMessage(Message.CONNECTION_ERROR);
-            try {
-                out.writeObject(dataEncapsulation);
-            } catch (IOException ex) {
-                Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            dataEncapsulation.setMessage(Message.USER_NOTFOUND);
+            sendMessage(dataEncapsulation, out);
         }  catch (Exception ex) {
             Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
@@ -116,9 +107,19 @@ public class PetitionControllerThread extends Thread{
                 in.close();
                 out.close();
                 socket.close();
+                closeThread(this);
+                interrupt();
             } catch (IOException ex) {
                 Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    private void sendMessage(DataEncapsulation data, ObjectOutputStream out){
+        
+        try {
+                out.writeObject(dataEncapsulation);
+            } catch (IOException ex) {
+                Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
+            }
     }
 }
