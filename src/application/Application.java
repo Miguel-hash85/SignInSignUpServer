@@ -29,10 +29,12 @@ public class Application {
     private final static int PORT = Integer.parseInt(ResourceBundle.getBundle("config.configuration").getString("PORT"));
     private final static short MAX_CONNECTIONS = Short.parseShort(ResourceBundle.getBundle("config.configuration").getString("MAXCONNECTIONS"));
     private static ArrayList<PetitionControllerThread> petitionControllerThreads = new ArrayList<>();
+    private static final Logger logger = Logger.getLogger("application.Application.class");
 
     public static void main(String[] args) {
         // TODO code application logic here
         //petitionControllerThreads = new ArrayList<>();
+        logger.info("The server accept connections and execute petitions");
         ServerSocket serverSocket = null;
         PetitionControllerThread petitionControllerThread = null;
         Socket clientSocket = null;
@@ -75,6 +77,7 @@ public class Application {
     }
 
     public static synchronized void closeThread(PetitionControllerThread thread) {
+        logger.info("Connections release");
         petitionControllerThreads.remove(thread);
     }
 

@@ -19,7 +19,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.DaoableFactory;
+import model.SignableFactory;
 
 /**
  *
@@ -28,8 +28,9 @@ import model.DaoableFactory;
 public class PetitionControllerThread extends Thread{
     private Socket socket;
     private DataEncapsulation dataEncapsulation;
-    private DaoableFactory daoableFactory;
+    private SignableFactory daoableFactory;
     private Signable signable;
+    private static final Logger logger = Logger.getLogger("logic.PetitionControllerThread.class");
     
 
     public Socket getSocket() {
@@ -37,6 +38,7 @@ public class PetitionControllerThread extends Thread{
     }
 
     public void setSocket(Socket socket) {
+        logger.info("Socket set");
         this.socket = socket;
     }
 
@@ -48,11 +50,11 @@ public class PetitionControllerThread extends Thread{
         this.dataEncapsulation = dataEncapsulation;
     }
 
-    public DaoableFactory getDaoableFactory() {
+    public SignableFactory getDaoableFactory() {
         return daoableFactory;
     }
 
-    public void setDaoableFactory(DaoableFactory daoableFactory) {
+    public void setDaoableFactory(SignableFactory daoableFactory) {
         this.daoableFactory = daoableFactory;
     }
 
@@ -67,7 +69,8 @@ public class PetitionControllerThread extends Thread{
     
     @Override
     public void run(){
-        daoableFactory=new DaoableFactory();
+        logger.info("Petitions of signIn and signUp done");
+        daoableFactory=new SignableFactory();
         signable=daoableFactory.getSignableImplementation();
         ObjectInputStream in = null;
         ObjectOutputStream out = null; 
@@ -115,7 +118,7 @@ public class PetitionControllerThread extends Thread{
         }
     }
     private void sendMessage(DataEncapsulation data, ObjectOutputStream out){
-        
+        logger.info("Petition results sent to the client");
         try {
                 out.writeObject(dataEncapsulation);
             } catch (IOException ex) {

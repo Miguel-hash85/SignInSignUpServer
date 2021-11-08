@@ -17,12 +17,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.logging.Logger;
 
 /**
  *
  * @author 2dam
  */
-public class DaoableImplementation implements Signable {
+public class DaoSignableImplementation implements Signable {
 
     private static BasicConnectionPool pool = new BasicConnectionPool();
     private PreparedStatement stmt;
@@ -35,17 +36,19 @@ public class DaoableImplementation implements Signable {
     private final String countSignIns = ("Select count(lastSignIn) as \"count\" from signin where id_user=?");
     private final String insertSignInDate = ("Insert into signin (lastSignIn, id_user) values (?,?)");
     private final String selectForUpdate = "Select * from signin where id_user=? order by lastSignIn";
-
+    private static final Logger logger = Logger.getLogger("model.BasicConnectionPool.class");
+    
     @Override
     public void signUp(User user) throws UserAlreadyExistException, ConnectionRefusedException, Exception {
 
         con = pool.getConnection();
-
         try {
             stmt = con.prepareStatement(select);
             stmt.setString(1, user.getLogin());
             rs = stmt.executeQuery();
+            logger.info("User searched");
             if (rs.next()) {
+                logger.info("User already exist");
                 throw new UserAlreadyExistException();
             } else {
                 stmt = con.prepareStatement(insert);
@@ -57,9 +60,10 @@ public class DaoableImplementation implements Signable {
                 stmt.setString(6, user.getPassword());
                 stmt.setTimestamp(7, Timestamp.valueOf(user.getLastPasswordChange()));
                 stmt.executeUpdate();
+                logger.info("User inserted in the database");
             }
         } catch (SQLException ex) {
-            throw new ConnectionRefusedException();
+             throw new Exception();
         } finally {
             rs.close();
             pool.releaseConnection(con);
@@ -72,6 +76,7 @@ public class DaoableImplementation implements Signable {
 
         con = pool.getConnection();
         try {
+            logger.info("User searched");
             stmt = con.prepareStatement(select);
             stmt.setString(1, user.getLogin());
             rs = stmt.executeQuery();
@@ -100,19 +105,20 @@ public class DaoableImplementation implements Signable {
                         }
                     }
                 } else {
+                    logger.info("Incorrect password");
                     throw new IncorrectPasswordException();
                 }
             } else {
+                logger.info("User not found");
                 throw new UserNotFoundException();
             }
         } catch (SQLException ex) {
-            throw new ConnectionRefusedException();
-
+            throw new Exception();
         } finally {
             rs.close();
             pool.releaseConnection(con);
         }
-
+        logger.info("User info returned to the client");
         return user;
     }
 

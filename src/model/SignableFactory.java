@@ -15,14 +15,14 @@ import interfaces.Signable;
  *
  * @author Zeeshan Yaqoob
  */
-public class DaoableFactory {
+public class SignableFactory {
 
     /**
      *
      * @return an object of Signable that would be DaobleImplementation;
      */
     public Signable getSignableImplementation(){
-        Signable signable= new DaoableImplementation();
+        Signable signable= new DaoSignableImplementation();
         return signable;
     }
 }
