@@ -32,9 +32,9 @@ public class DaoableImplementation implements Signable {
     private Connection con;
     private final String insert = ("Insert into user (login,email,fullname,status,privilege,password,lastpasswordchange) values(?,?,?,?,?,?,?)");
     private final String select = ("Select * from user where login=?");
-    private final String countSignIns=("Select count(lastSignIn) as \"count\" from signin where id_user=?");
-    private final String insertSignInDate=("Insert into signin (lastSignIn, id_user) values (?,?)");
-    private final String selectForUpdate="Select * from signin where id_user=? order by lastSignIn";
+    private final String countSignIns = ("Select count(lastSignIn) as \"count\" from signin where id_user=?");
+    private final String insertSignInDate = ("Insert into signin (lastSignIn, id_user) values (?,?)");
+    private final String selectForUpdate = "Select * from signin where id_user=? order by lastSignIn";
 
     @Override
     public void signUp(User user) throws UserAlreadyExistException, ConnectionRefusedException, Exception {
@@ -62,9 +62,9 @@ public class DaoableImplementation implements Signable {
             throw new ConnectionRefusedException();
         } finally {
             rs.close();
+            pool.releaseConnection(con);
         }
 
-        pool.releaseConnection(con);
     }
 
     @Override
@@ -81,37 +81,38 @@ public class DaoableImplementation implements Signable {
                     user.setFullname(rs.getString("fullname"));
                     user.setEmail(rs.getString("email"));
                     user.setLogin(rs.getString("login"));
-                    stmtSignIn=con.prepareStatement(countSignIns);
+                    stmtSignIn = con.prepareStatement(countSignIns);
                     stmtSignIn.setInt(1, rs.getInt("id"));
-                    rsSignIn=stmtSignIn.executeQuery();
-                    if(rsSignIn.next()){
-                        if(rsSignIn.getInt("count")==2){
-                            stmtSignIn=con.prepareStatement(selectForUpdate, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                    rsSignIn = stmtSignIn.executeQuery();
+                    if (rsSignIn.next()) {
+                        if (rsSignIn.getInt("count") == 10) {
+                            stmtSignIn = con.prepareStatement(selectForUpdate, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
                             stmtSignIn.setInt(1, rs.getInt("id"));
-                            rsSignIn=stmtSignIn.executeQuery();
+                            rsSignIn = stmtSignIn.executeQuery();
                             rsSignIn.first();
                             rsSignIn.updateTimestamp("lastSignIn", Timestamp.valueOf(LocalDateTime.now()));
                             rsSignIn.updateRow();
-                        }else{
-                            stmtSignIn=con.prepareStatement(insertSignInDate);
+                        } else {
+                            stmtSignIn = con.prepareStatement(insertSignInDate);
                             stmtSignIn.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                             stmtSignIn.setInt(2, rs.getInt("id"));
                             stmtSignIn.executeUpdate();
                         }
                     }
-                }
-                else
+                } else {
                     throw new IncorrectPasswordException();
+                }
             } else {
                 throw new UserNotFoundException();
             }
         } catch (SQLException ex) {
             throw new ConnectionRefusedException();
-            
+
         } finally {
             rs.close();
+            pool.releaseConnection(con);
         }
-        pool.releaseConnection(con);
+
         return user;
     }
 
