@@ -25,20 +25,20 @@ import model.SignableFactory;
  *
  * @author Aitor Ruiz de Gauna.
  */
-public class PetitionControllerThread extends Thread{
+public class PetitionControllerThread extends Thread {
+
     private Socket socket;
     private DataEncapsulation dataEncapsulation;
     private SignableFactory daoableFactory;
     private Signable signable;
-    private static final Logger logger = Logger.getLogger("logic.PetitionControllerThread.class");
-    
+    private static final Logger LOGGER = Logger.getLogger("logic.PetitionControllerThread.class");
 
     public Socket getSocket() {
         return socket;
     }
 
     public void setSocket(Socket socket) {
-        logger.info("Socket set");
+        LOGGER.info("Socket set");
         this.socket = socket;
     }
 
@@ -65,24 +65,23 @@ public class PetitionControllerThread extends Thread{
     public void setSignable(Signable signable) {
         this.signable = signable;
     }
-    
-    
+
     @Override
-    public void run(){
-        logger.info("Petitions of signIn and signUp done");
-        daoableFactory=new SignableFactory();
-        signable=daoableFactory.getSignableImplementation();
+    public void run() {
+        LOGGER.info("Petitions of signIn and signUp done");
+        daoableFactory = new SignableFactory();
+        signable = daoableFactory.getSignableImplementation();
         ObjectInputStream in = null;
-        ObjectOutputStream out = null; 
-        try{
-            in= new ObjectInputStream(socket.getInputStream());
-             out = new ObjectOutputStream(socket.getOutputStream());
-            dataEncapsulation=(DataEncapsulation) in.readObject();
-            if(dataEncapsulation.getMessage().equals(Message.SIGNIN)){
+        ObjectOutputStream out = null;
+        try {
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
+            dataEncapsulation = (DataEncapsulation) in.readObject();
+            if (dataEncapsulation.getMessage().equals(Message.SIGNIN)) {
                 dataEncapsulation.setUser(signable.signIn(dataEncapsulation.getUser()));
                 dataEncapsulation.setMessage(Message.OK);
                 out.writeObject(dataEncapsulation);
-            }else if(dataEncapsulation.getMessage().equals(Message.SIGNUP)){
+            } else if (dataEncapsulation.getMessage().equals(Message.SIGNUP)) {
                 signable.signUp(dataEncapsulation.getUser());
                 dataEncapsulation.setMessage(Message.OK);
                 out.writeObject(dataEncapsulation);
@@ -91,21 +90,21 @@ public class PetitionControllerThread extends Thread{
             Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
-        }catch (UserAlreadyExistException aex) {
+        } catch (UserAlreadyExistException aex) {
             dataEncapsulation.setMessage(Message.EXISTING_USERNAME);
             sendMessage(dataEncapsulation, out);
-        }catch (ConnectionRefusedException cex) {
+        } catch (ConnectionRefusedException cex) {
             dataEncapsulation.setMessage(Message.CONNECTION_ERROR);
             sendMessage(dataEncapsulation, out);
-        }catch (IncorrectPasswordException cex) {
+        } catch (IncorrectPasswordException cex) {
             dataEncapsulation.setMessage(Message.INCORRECT_PASSWORD);
             sendMessage(dataEncapsulation, out);
-        }catch (UserNotFoundException cex) {
+        } catch (UserNotFoundException cex) {
             dataEncapsulation.setMessage(Message.USER_NOTFOUND);
             sendMessage(dataEncapsulation, out);
-        }  catch (Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+        } finally {
             try {
                 in.close();
                 out.close();
@@ -117,12 +116,13 @@ public class PetitionControllerThread extends Thread{
             }
         }
     }
-    private void sendMessage(DataEncapsulation data, ObjectOutputStream out){
-        logger.info("Petition results sent to the client");
+
+    private void sendMessage(DataEncapsulation data, ObjectOutputStream out) {
+        LOGGER.info("Petition results sent to the client");
         try {
-                out.writeObject(dataEncapsulation);
-            } catch (IOException ex) {
-                Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            out.writeObject(dataEncapsulation);
+        } catch (IOException ex) {
+            Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

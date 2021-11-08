@@ -36,7 +36,7 @@ public class DaoSignableImplementation implements Signable {
     private final String countSignIns = ("Select count(lastSignIn) as \"count\" from signin where id_user=?");
     private final String insertSignInDate = ("Insert into signin (lastSignIn, id_user) values (?,?)");
     private final String selectForUpdate = "Select * from signin where id_user=? order by lastSignIn";
-    private static final Logger logger = Logger.getLogger("model.BasicConnectionPool.class");
+    private static final Logger LOGGER = Logger.getLogger("model.BasicConnectionPool.class");
     
     @Override
     public void signUp(User user) throws UserAlreadyExistException, ConnectionRefusedException, Exception {
@@ -46,9 +46,9 @@ public class DaoSignableImplementation implements Signable {
             stmt = con.prepareStatement(select);
             stmt.setString(1, user.getLogin());
             rs = stmt.executeQuery();
-            logger.info("User searched");
+            LOGGER.info("User searched");
             if (rs.next()) {
-                logger.info("User already exist");
+                LOGGER.info("User already exist");
                 throw new UserAlreadyExistException();
             } else {
                 stmt = con.prepareStatement(insert);
@@ -60,7 +60,7 @@ public class DaoSignableImplementation implements Signable {
                 stmt.setString(6, user.getPassword());
                 stmt.setTimestamp(7, Timestamp.valueOf(user.getLastPasswordChange()));
                 stmt.executeUpdate();
-                logger.info("User inserted in the database");
+                LOGGER.info("User inserted in the database");
             }
         } catch (SQLException ex) {
              throw new Exception();
@@ -76,7 +76,7 @@ public class DaoSignableImplementation implements Signable {
 
         con = pool.getConnection();
         try {
-            logger.info("User searched");
+            LOGGER.info("User searched");
             stmt = con.prepareStatement(select);
             stmt.setString(1, user.getLogin());
             rs = stmt.executeQuery();
@@ -105,11 +105,11 @@ public class DaoSignableImplementation implements Signable {
                         }
                     }
                 } else {
-                    logger.info("Incorrect password");
+                    LOGGER.info("Incorrect password");
                     throw new IncorrectPasswordException();
                 }
             } else {
-                logger.info("User not found");
+                LOGGER.info("User not found");
                 throw new UserNotFoundException();
             }
         } catch (SQLException ex) {
@@ -118,7 +118,7 @@ public class DaoSignableImplementation implements Signable {
             rs.close();
             pool.releaseConnection(con);
         }
-        logger.info("User info returned to the client");
+        LOGGER.info("User info returned to the client");
         return user;
     }
 
