@@ -24,23 +24,41 @@ import java.util.logging.Logger;
  * @author 2dam
  */
 public class DaoSignableImplementation implements Signable {
-
+    // Connection pool.
     private static BasicConnectionPool pool = new BasicConnectionPool();
     private PreparedStatement stmt;
     private PreparedStatement stmtSignIn;
     private ResultSet rs;
     private ResultSet rsSignIn;
     private Connection con;
+    // Query to add user to database, (signUp to the application)l.
     private final String insert = ("Insert into user (login,email,fullname,status,privilege,password,lastpasswordchange) values(?,?,?,?,?,?,?)");
+    // Query to Select a user to let him sign in.
     private final String select = ("Select * from user where login=?");
+    // Query to count the number of signIns of an user.
     private final String countSignIns = ("Select count(lastSignIn) as \"count\" from signin where id_user=?");
+    // Query to add signIn of an user to database.
     private final String insertSignInDate = ("Insert into signin (lastSignIn, id_user) values (?,?)");
+    // Query to manage the last 10 logins of an user.
     private final String selectForUpdate = "Select * from signin where id_user=? order by lastSignIn";
+    // Logger to record the events and trace out errors.
     private static final Logger LOGGER = Logger.getLogger("model.BasicConnectionPool.class");
+    
+    
+    /**
+     * 
+     * @param user, receives an user to add it the database.
+     * @throws UserAlreadyExistException will be thrown When it gets a message from server that the user already exist.
+     * @throws ConnectionRefusedException will be thrown when connection to server get refused.
+     * @throws Exception This Method can throws Exception
+     */
+    
+   
+    
     
     @Override
     public void signUp(User user) throws UserAlreadyExistException, ConnectionRefusedException, Exception {
-
+        // A connection from connection pool taken.
         con = pool.getConnection();
         try {
             stmt = con.prepareStatement(select);
@@ -66,11 +84,20 @@ public class DaoSignableImplementation implements Signable {
              throw new Exception();
         } finally {
             rs.close();
+            // Connection returned to connection pool
             pool.releaseConnection(con);
         }
 
     }
-
+/**
+ * 
+ * @param user, receives an user to search from database.
+ * @return user, if user is found in database.
+ * @throws UserNotFoundException will be thrown incase of user does not exist in database.
+ * @throws IncorrectPasswordException will be thrown in case of user exist but received password does not match to one in database,
+ * @throws ConnectionRefusedException will be thrown in case of connection to server is refused.
+ * @throws Exception This Method can throws Exception
+ */
     @Override
     public User signIn(User user) throws UserNotFoundException, IncorrectPasswordException, ConnectionRefusedException, Exception {
 
@@ -91,6 +118,7 @@ public class DaoSignableImplementation implements Signable {
                     rsSignIn = stmtSignIn.executeQuery();
                     if (rsSignIn.next()) {
                         if (rsSignIn.getInt("count") == 10) {
+                            // in case of an users signIns reached to 10, update of 1st (oldest) to the time of signIn.
                             stmtSignIn = con.prepareStatement(selectForUpdate, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
                             stmtSignIn.setInt(1, rs.getInt("id"));
                             rsSignIn = stmtSignIn.executeQuery();

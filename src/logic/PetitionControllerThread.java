@@ -31,37 +31,70 @@ public class PetitionControllerThread extends Thread {
     private DataEncapsulation dataEncapsulation;
     private SignableFactory daoableFactory;
     private Signable signable;
+    // Logger to record the events and trace out errors.
     private static final Logger LOGGER = Logger.getLogger("logic.PetitionControllerThread.class");
 
+    /**
+     *
+     * @return an object of socket
+     */
     public Socket getSocket() {
         return socket;
     }
 
+    /**
+     *
+     * @param socket receives a socket.
+     */
     public void setSocket(Socket socket) {
         LOGGER.info("Socket set");
         this.socket = socket;
     }
 
+    /**
+     *
+     * @return an object of dataEnacpsulation.
+     */
     public DataEncapsulation getDataEncapsulation() {
         return dataEncapsulation;
     }
 
+    /**
+     *
+     * @param dataEncapsulation, receives an object of dataEncapsulation.
+     */
     public void setDataEncapsulation(DataEncapsulation dataEncapsulation) {
         this.dataEncapsulation = dataEncapsulation;
     }
 
+    /**
+     *
+     * @return an object of daoableFactory.
+     */
     public SignableFactory getDaoableFactory() {
         return daoableFactory;
     }
 
+    /**
+     *
+     * @param daoableFactory, receives an object of daoableFactory
+     */
     public void setDaoableFactory(SignableFactory daoableFactory) {
         this.daoableFactory = daoableFactory;
     }
 
+    /**
+     *
+     * @return an object of interface signable.
+     */
     public Signable getSignable() {
         return signable;
     }
 
+    /**
+     *
+     * @param signable receives an object of interface signable.
+     */
     public void setSignable(Signable signable) {
         this.signable = signable;
     }
@@ -76,16 +109,20 @@ public class PetitionControllerThread extends Thread {
         try {
             in = new ObjectInputStream(socket.getInputStream());
             out = new ObjectOutputStream(socket.getOutputStream());
+            //reading dataEncapsulation to know the type of message.
             dataEncapsulation = (DataEncapsulation) in.readObject();
+            // if message is SIGNIN, call to interface to recieve the user from database.
             if (dataEncapsulation.getMessage().equals(Message.SIGNIN)) {
                 dataEncapsulation.setUser(signable.signIn(dataEncapsulation.getUser()));
                 dataEncapsulation.setMessage(Message.OK);
                 out.writeObject(dataEncapsulation);
+                // if messsage is SIGNUP, call to interface to add user to database.
             } else if (dataEncapsulation.getMessage().equals(Message.SIGNUP)) {
                 signable.signUp(dataEncapsulation.getUser());
                 dataEncapsulation.setMessage(Message.OK);
                 out.writeObject(dataEncapsulation);
             }
+            // above two calls can throw these exceptions.
         } catch (IOException ex) {
             Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
@@ -116,7 +153,11 @@ public class PetitionControllerThread extends Thread {
             }
         }
     }
-
+/**
+ * 
+ * @param data, dataEncapsulation that received by call to database, 
+ * @param out , output stream to send dataEncapsulation back to the client.
+ */
     private void sendMessage(DataEncapsulation data, ObjectOutputStream out) {
         LOGGER.info("Petition results sent to the client");
         try {
