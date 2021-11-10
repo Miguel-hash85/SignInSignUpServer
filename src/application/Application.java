@@ -18,9 +18,10 @@ import java.util.logging.Logger;
 import logic.PetitionControllerThread;
 
 /**
- *
- * @author Zeeshan Yaqoob
+ * This is the principal class of application server.
+ * @author Zeeshan Yaqoob 
  */
+
 public class Application {
 
    // An object of port that is getting its value from configuration file from package config.
@@ -33,7 +34,7 @@ public class Application {
     private static final Logger LOGGER = Logger.getLogger("application.Application.class");
 
     /**
-     *
+     * This method runs the application.
      * @param args Applications entry point.
      */
     public static void main(String[] args) {
@@ -89,7 +90,7 @@ public class Application {
     }
 
     /**
-     *
+     *  This method synchronize and close the client´s petitions. 
      * @param thread, method to remove client (PetitionControllerThread) once it has done the action.
      */
     public static synchronized void closeThread(PetitionControllerThread thread) {

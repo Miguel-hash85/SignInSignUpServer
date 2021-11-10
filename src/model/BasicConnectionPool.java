@@ -14,8 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author 2dam
+ * Class that manages the ConnectionPool for database.
+ * @author Aitor Ruiz de Gauna.
  */
 public class BasicConnectionPool {
 
@@ -33,7 +33,7 @@ public class BasicConnectionPool {
 
 
     /**
-     *
+     * Method that creates a pool of connection.
      */
     public BasicConnectionPool() {
         LOGGER.info("ConnectionPool created");
@@ -55,7 +55,7 @@ public class BasicConnectionPool {
     }
     
     /**
-     *
+     * Method that return a connection
      * @return a connection, when a connection is required it would be taken from the connectionPool and added to usedConnections collection.
      */
     public Connection getConnection() {
@@ -66,7 +66,7 @@ public class BasicConnectionPool {
     }
     
     /**
-     *
+     * Method that receives the used connection and add it back to the pool.
      * @param connection, an object of connection.
      * @return confirmation of if connection is added to pool.
      * When is connection is free and not being used it would again added to the pool, and would be removed
@@ -78,7 +78,7 @@ public class BasicConnectionPool {
         return usedConnections.remove(connection);
     }
     /**
-     * 
+     * Method that creates a connection.
      * @param url
      * @param user
      * @param password
@@ -91,7 +91,7 @@ public class BasicConnectionPool {
     }
     
     /**
-     *
+     * Method that return the available number of connections.
      * @return calculate and return the number of available connections.
      */
     public int getSize() {

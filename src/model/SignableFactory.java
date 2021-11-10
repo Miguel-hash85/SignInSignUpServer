@@ -4,22 +4,17 @@
  * and open the template in the editor.
  */
 package model;
-
-/**
- *
- * @author Zeeshan Yaqoob
- */
 import interfaces.Signable;
 
 /**
- *
+ *  Class that generate implementation of the interface signable.
  * @author Zeeshan Yaqoob
  */
 public class SignableFactory {
 
     /**
-     *
-     * @return an object of Signable that would be DaobleImplementation;
+     * This method creates and return an object of DaoSignableImplementation.
+     * @return an object of Signable that would be DaoSignableImplementation;
      */
     public Signable getSignableImplementation(){
         Signable signable= new DaoSignableImplementation();

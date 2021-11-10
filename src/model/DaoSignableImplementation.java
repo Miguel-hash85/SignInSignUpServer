@@ -20,8 +20,8 @@ import java.time.LocalDateTime;
 import java.util.logging.Logger;
 
 /**
- *
- * @author 2dam
+ * Class that manages the DAO operations.
+ * @author Miguel Sanchez, Aitor Ruiz de Gauna.
  */
 public class DaoSignableImplementation implements Signable {
     // Connection pool.
@@ -46,7 +46,7 @@ public class DaoSignableImplementation implements Signable {
     
     
     /**
-     * 
+     * Method that add the user to the database.
      * @param user, receives an user to add it the database.
      * @throws UserAlreadyExistException will be thrown When it gets a message from server that the user already exist.
      * @throws ConnectionRefusedException will be thrown when connection to server get refused.
@@ -90,7 +90,7 @@ public class DaoSignableImplementation implements Signable {
 
     }
 /**
- * 
+ * Method that look for required user in database and return that user and manages the user's signIns record.
  * @param user, receives an user to search from database.
  * @return user, if user is found in database.
  * @throws UserNotFoundException will be thrown incase of user does not exist in database.
@@ -118,7 +118,7 @@ public class DaoSignableImplementation implements Signable {
                     rsSignIn = stmtSignIn.executeQuery();
                     if (rsSignIn.next()) {
                         if (rsSignIn.getInt("count") == 10) {
-                            // in case of an users signIns reached to 10, update of 1st (oldest) to the time of signIn.
+                            // in case of signIns record of an user reached to 10, update of 1st (oldest) to the time of signIn.
                             stmtSignIn = con.prepareStatement(selectForUpdate, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
                             stmtSignIn.setInt(1, rs.getInt("id"));
                             rsSignIn = stmtSignIn.executeQuery();
@@ -126,6 +126,7 @@ public class DaoSignableImplementation implements Signable {
                             rsSignIn.updateTimestamp("lastSignIn", Timestamp.valueOf(LocalDateTime.now()));
                             rsSignIn.updateRow();
                         } else {
+                            // Insert of signIn record of the user.
                             stmtSignIn = con.prepareStatement(insertSignInDate);
                             stmtSignIn.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                             stmtSignIn.setInt(2, rs.getInt("id"));

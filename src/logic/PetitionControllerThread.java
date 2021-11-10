@@ -25,6 +25,9 @@ import model.SignableFactory;
  *
  * @author Aitor Ruiz de Gauna.
  */
+/**
+ * This class creates a thread so client can register it`s petition.
+ */
 public class PetitionControllerThread extends Thread {
 
     private Socket socket;
@@ -35,7 +38,7 @@ public class PetitionControllerThread extends Thread {
     private static final Logger LOGGER = Logger.getLogger("logic.PetitionControllerThread.class");
 
     /**
-     *
+     * This method return the socket.
      * @return an object of socket
      */
     public Socket getSocket() {
@@ -43,7 +46,7 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     *
+     * This method receives a socket.
      * @param socket receives a socket.
      */
     public void setSocket(Socket socket) {
@@ -52,7 +55,7 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     *
+     * This method return a dataEncapsulation object.
      * @return an object of dataEnacpsulation.
      */
     public DataEncapsulation getDataEncapsulation() {
@@ -60,7 +63,7 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     *
+     * This method receives a dataEncapsulation object.
      * @param dataEncapsulation, receives an object of dataEncapsulation.
      */
     public void setDataEncapsulation(DataEncapsulation dataEncapsulation) {
@@ -68,7 +71,7 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     *
+     * This method return a daoableFactory object.
      * @return an object of daoableFactory.
      */
     public SignableFactory getDaoableFactory() {
@@ -76,7 +79,7 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     *
+     * This method receives a daoableFactory.
      * @param daoableFactory, receives an object of daoableFactory
      */
     public void setDaoableFactory(SignableFactory daoableFactory) {
@@ -84,7 +87,7 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     *
+     * This method return an object of interface sigbable.
      * @return an object of interface signable.
      */
     public Signable getSignable() {
@@ -92,13 +95,16 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     *
+     * This method receives an object of interface signablel.
      * @param signable receives an object of interface signable.
      */
     public void setSignable(Signable signable) {
         this.signable = signable;
     }
-
+   
+    /**
+     * This method run the petition to process.
+     */
     @Override
     public void run() {
         LOGGER.info("Petitions of signIn and signUp done");
@@ -154,7 +160,7 @@ public class PetitionControllerThread extends Thread {
         }
     }
 /**
- * 
+ * This method send the response to client.
  * @param data, dataEncapsulation that received by call to database, 
  * @param out , output stream to send dataEncapsulation back to the client.
  */
