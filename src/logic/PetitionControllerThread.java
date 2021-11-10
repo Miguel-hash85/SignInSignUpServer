@@ -5,7 +5,7 @@
  */
 package logic;
 
-import static application.Application.closeThread;
+import static application.Server.closeThread;
 import classes.DataEncapsulation;
 import classes.Message;
 import exceptions.ConnectionRefusedException;

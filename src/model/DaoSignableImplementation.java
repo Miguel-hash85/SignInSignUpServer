@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class DaoSignableImplementation implements Signable {
     // Connection pool.
-    private static BasicConnectionPool pool = new BasicConnectionPool();
+    public static BasicConnectionPool POOL = new BasicConnectionPool();
     private PreparedStatement stmt;
     private PreparedStatement stmtSignIn;
     private ResultSet rs;
@@ -59,7 +59,7 @@ public class DaoSignableImplementation implements Signable {
     @Override
     public void signUp(User user) throws UserAlreadyExistException, ConnectionRefusedException, Exception {
         // A connection from connection pool taken.
-        con = pool.getConnection();
+        con = POOL.getConnection();
         try {
             stmt = con.prepareStatement(select);
             stmt.setString(1, user.getLogin());
@@ -85,7 +85,7 @@ public class DaoSignableImplementation implements Signable {
         } finally {
             rs.close();
             // Connection returned to connection pool
-            pool.releaseConnection(con);
+            POOL.releaseConnection(con);
         }
 
     }
@@ -101,7 +101,7 @@ public class DaoSignableImplementation implements Signable {
     @Override
     public User signIn(User user) throws UserNotFoundException, IncorrectPasswordException, ConnectionRefusedException, Exception {
 
-        con = pool.getConnection();
+        con = POOL.getConnection();
         try {
             LOGGER.info("User searched");
             stmt = con.prepareStatement(select);
@@ -145,7 +145,7 @@ public class DaoSignableImplementation implements Signable {
             throw new Exception();
         } finally {
             rs.close();
-            pool.releaseConnection(con);
+            POOL.releaseConnection(con);
         }
         LOGGER.info("User info returned to the client");
         return user;
