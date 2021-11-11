@@ -49,23 +49,27 @@ public class Server extends Thread{
         LOGGER.info("The server accept connections and execute petitions");
         // Declaration of server socket.
         ServerSocket serverSocket = null;
+        // Declaration of the petitionControllerThread.
         PetitionControllerThread petitionControllerThread = null;
         // Declaration of client socket.
         Socket clientSocket = null;
         // Decalation of input and output streams to send and receive messages.
         ObjectOutputStream out = null;
+        // Declaration of dataEncapsulation.
         DataEncapsulation dataEncapsulaton;
         try {
+            //Server socket creation.
             serverSocket = new ServerSocket(PORT);
             while (!endServer) {
                 // Connection between server and client is established
                 clientSocket = serverSocket.accept();
                 if (clientSocket != null) {
+                    //PetitionControllerThread instanced and socket value set.
                     petitionControllerThread = new PetitionControllerThread();
                     petitionControllerThread.setSocket(clientSocket);
 
                 }
-                // incase of number of clients is reached to max.
+                // In case of number of clients is reached to max a connectionRefusedError message will be sent to the client.
                 if (petitionControllerThreads.size() >= MAX_CONNECTIONS) {
                     out = new ObjectOutputStream(clientSocket.getOutputStream());
                     dataEncapsulaton = new DataEncapsulation();
@@ -73,7 +77,7 @@ public class Server extends Thread{
                     out.writeObject(dataEncapsulaton);
 
                 } else {
-                    // client would be addded to collection of threads.
+                    // Client thread would be addded to collection of petitionControllerThreads and started.
                     synchronized (petitionControllerThreads) {
                         petitionControllerThreads.add(petitionControllerThread);
                         petitionControllerThread.start();
@@ -81,9 +85,13 @@ public class Server extends Thread{
 
                 }       
             }
+            //Closing clientSocket.
             clientSocket.close();
+            //Closing open connections.
             POOL.closeConnections();
+            //Close thread.
             closeThreads();
+            //Ends the server.
             exit(0);
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
@@ -117,6 +125,7 @@ public class Server extends Thread{
     public synchronized void closeThreads(){
         for(int i=0;i<petitionControllerThreads.size();i++){
             petitionControllerThreads.get(i).interrupt();
+            closeThread(petitionControllerThreads.get(i));
         }
     }
 }

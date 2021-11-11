@@ -29,10 +29,13 @@ import model.SignableFactory;
  * This class creates a thread so client can register it`s petition.
  */
 public class PetitionControllerThread extends Thread {
-
+    //Declaration of the socket.
     private Socket socket;
+    //Declaration of the dataEncapsulation.
     private DataEncapsulation dataEncapsulation;
-    private SignableFactory daoableFactory;
+    //Declaration of the signableFactory.
+    private SignableFactory signableFactory;
+    //Declaration of the signable interface;
     private Signable signable;
     // Logger to record the events and trace out errors.
     private static final Logger LOGGER = Logger.getLogger("logic.PetitionControllerThread.class");
@@ -71,19 +74,19 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     * This method return a daoableFactory object.
-     * @return an object of daoableFactory.
+     * This method return a signableFactory object.
+     * @return an object of signableFactory.
      */
-    public SignableFactory getDaoableFactory() {
-        return daoableFactory;
+    public SignableFactory getSignableFactory() {
+        return signableFactory;
     }
 
     /**
-     * This method receives a daoableFactory.
-     * @param daoableFactory, receives an object of daoableFactory
+     * This method receives a signableFactory.
+     * @param signableFactory, receives an object of daoableFactory
      */
-    public void setDaoableFactory(SignableFactory daoableFactory) {
-        this.daoableFactory = daoableFactory;
+    public void setSignableFactory(SignableFactory signableFactory) {
+        this.signableFactory = signableFactory;
     }
 
     /**
@@ -95,7 +98,7 @@ public class PetitionControllerThread extends Thread {
     }
 
     /**
-     * This method receives an object of interface signablel.
+     * This method receives an object of interface signable.
      * @param signable receives an object of interface signable.
      */
     public void setSignable(Signable signable) {
@@ -108,12 +111,16 @@ public class PetitionControllerThread extends Thread {
     @Override
     public void run() {
         LOGGER.info("Petitions of signIn and signUp done");
-        daoableFactory = new SignableFactory();
-        signable = daoableFactory.getSignableImplementation();
+        //signableFactory instanced.
+        signableFactory = new SignableFactory();
+        //signable value set with the getSignableImplementation of the signableFactory
+        signable = signableFactory.getSignableImplementation();
         ObjectInputStream in = null;
         ObjectOutputStream out = null;
         try {
+            //Read stream created
             in = new ObjectInputStream(socket.getInputStream());
+            //Write stream created
             out = new ObjectOutputStream(socket.getOutputStream());
             //reading dataEncapsulation to know the type of message.
             dataEncapsulation = (DataEncapsulation) in.readObject();
@@ -149,9 +156,12 @@ public class PetitionControllerThread extends Thread {
             Logger.getLogger(PetitionControllerThread.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
+                //close the read and write streams.
                 in.close();
                 out.close();
+                //close the socket
                 socket.close();
+                //delete the thread from the collection of petitionControllerThread.
                 closeThread(this);
                 interrupt();
             } catch (IOException ex) {
