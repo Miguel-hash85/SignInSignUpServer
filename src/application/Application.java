@@ -5,60 +5,33 @@
  */
 package application;
 
-import classes.DataEncapsulation;
-import classes.Message;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import logic.PetitionControllerThread;
+import static java.lang.System.exit;
+import utilities.Util;
 
 /**
  *
- * @author 2dam
+ * @author Aitor
  */
 public class Application {
 
     /**
      * @param args the command line arguments
      */
-    private static int PORT = 9000;
-
     public static void main(String[] args) {
-        // TODO code application logic here
-        ArrayList<PetitionControllerThread> petitionControllerThreads = new ArrayList<>();
-        ServerSocket serverSocket = null;
-        PetitionControllerThread petitionControllerThread = null;
-        Socket clientSocket = null;
-        ObjectOutputStream out;
-        DataEncapsulation dataEncapsulaton;
-        try {
-
-            while (true) {
-                serverSocket = new ServerSocket(PORT);
-                clientSocket = serverSocket.accept();
-                if (clientSocket != null) {
-                    petitionControllerThread = new PetitionControllerThread();
-                    petitionControllerThread.setSocket(clientSocket);
-                    petitionControllerThreads.add(petitionControllerThread);
-                }       
-                if(petitionControllerThreads.size()>=10) {
-                    out = new ObjectOutputStream(clientSocket.getOutputStream());
-                    dataEncapsulaton = new DataEncapsulation();
-                    dataEncapsulaton.setMessage(Message.CONNECTION_ERROR);
-                    out.writeObject(dataEncapsulaton);
-                    out.close();
-                } else if(petitionControllerThreads.size()>0){
-                    petitionControllerThread.start();
-                }
+        //Server thread initiated to accept connections.
+        Server server=new Server();
+        server.start();
+        while(true){
+            int end;
+            //Read a message, when this message is 0 the server loop will end.
+            end = Util.leerInt("Introduce 0 to stop the server");
+            if(end==0){
+                server.setEndServer(true);
+                break;
             }
-
-        } catch (IOException ex) {
-            Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
         }
+        //Ends the application.
+        exit(0);
     }
-
+    
 }
